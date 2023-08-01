@@ -5,9 +5,12 @@ import { User, UserDocument } from './schemas/user.schemas';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     createUserDto.password = this.getHashPassword(createUserDto.password);
@@ -48,7 +51,7 @@ export class UsersService {
   }
 
   remove(id: string) {
-    const result = this.userModel.deleteOne({ _id: id });
+    const result = this.userModel.softDelete({ _id: id });
     return result;
   }
 }

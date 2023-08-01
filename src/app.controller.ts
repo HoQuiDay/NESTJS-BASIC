@@ -6,14 +6,5 @@ import { Public } from './decorator/customer';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly authService: AuthService,
-  ) {}
-  @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
-  }
+  constructor(private readonly appService: AppService) {}
 }
