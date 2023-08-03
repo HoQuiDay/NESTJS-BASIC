@@ -14,6 +14,7 @@ async function bootstrap() {
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
+    credentials: true,
   });
   app.setGlobalPrefix('api');
   app.enableVersioning({

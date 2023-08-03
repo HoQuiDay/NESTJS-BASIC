@@ -50,11 +50,11 @@ export class UsersService {
 
   async findAll(req: string) {
     let { filter, sort, population } = aqp(req);
-    const currentPage = filter.page;
+    const current = filter.current;
     const limit = filter.pageSize;
-    delete filter.page;
+    delete filter.current;
     delete filter.pageSize;
-    const offset = (+currentPage - 1) * +limit;
+    const offset = (+current - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
     const totalItems = (await this.userModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
@@ -67,7 +67,7 @@ export class UsersService {
       .exec();
     return {
       meta: {
-        current: currentPage, //trang hiện tại
+        current: current, //trang hiện tại
         pageSize: limit, //số lượng bản ghi đã lấy
         pages: totalPages, //tổng số trang với điều kiện query
         total: totalItems, // tổng số phần tử (số bản ghi)

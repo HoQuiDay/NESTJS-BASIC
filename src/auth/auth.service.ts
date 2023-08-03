@@ -37,7 +37,7 @@ export class AuthService {
     const refreshToken = this.createRefreshToken(payload);
     await this.usersService.updateRefreshToken(refreshToken, _id);
     res.cookie(this.configService.get<string>('NAME_COOKIES'), refreshToken, {
-      maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRIES')) * 1000, //milisecond
+      maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRIES')), //milisecond
       httpOnly: true,
     });
     return {

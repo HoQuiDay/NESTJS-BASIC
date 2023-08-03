@@ -37,9 +37,13 @@ export class CompaniesController {
     return this.companiesService.findOne(+id);
   }
 
-  @Put()
-  update(@Body() updateCompanyDto: UpdateCompanyDto, @User() user: IUser) {
-    return this.companiesService.update(updateCompanyDto, user);
+  @Patch(':id')
+  update(
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @User() user: IUser,
+    @Param('id') id: string,
+  ) {
+    return this.companiesService.update(updateCompanyDto, user, id);
   }
 
   @Delete(':id')
