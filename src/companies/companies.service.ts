@@ -20,9 +20,11 @@ export class CompaniesService {
   }
 
   async findAll(query: string) {
-    const { filter, population, sort, limit } = aqp(query);
-    const page = filter.page;
-    delete filter.page;
+    const { filter, population, sort } = aqp(query);
+    const page = filter.current;
+    const limit = filter.pageSize;
+    delete filter.current;
+    delete filter.pageSize;
     let offset = (+page - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
     const totalItems = (await this.companyModel.find(filter)).length;
@@ -49,9 +51,9 @@ export class CompaniesService {
     return `This action returns a #${id} company`;
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
+  async update(updateCompanyDto: UpdateCompanyDto, user: IUser) {
     return await this.companyModel.updateOne(
-      { _id: id },
+      { _id: updateCompanyDto._id },
       {
         ...updateCompanyDto,
         updatedBy: {
