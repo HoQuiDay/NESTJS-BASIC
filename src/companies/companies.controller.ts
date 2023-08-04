@@ -13,7 +13,7 @@ import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { IUser } from 'src/users/users.interface';
-import { ResponseMessage, User } from 'src/decorator/customer';
+import { Public, ResponseMessage, User } from 'src/decorator/customer';
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
@@ -22,8 +22,10 @@ export class CompaniesController {
   create(@Body() createCompanyDto: CreateCompanyDto, @User() user: IUser) {
     return this.companiesService.create(createCompanyDto, user);
   }
-  @ResponseMessage('Fetch Company Successfully!')
+
   @Get()
+  @Public()
+  @ResponseMessage('Fetch List Company Successfully!')
   findAll(
     // @Query('page') page: string,
     // @Query('limit') limit: string,
@@ -33,8 +35,10 @@ export class CompaniesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.companiesService.findOne(+id);
+  @Public()
+  @ResponseMessage('Fetch Company Successfully!')
+  handleFindOne(@Param('id') id: string) {
+    return this.companiesService.findOne(id);
   }
 
   @Patch(':id')

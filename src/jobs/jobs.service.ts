@@ -28,7 +28,7 @@ export class JobsService {
     const { current, pageSize } = filter;
     delete filter.current;
     delete filter.pageSize;
-    const offset = (+current - 1) * -pageSize;
+    const offset = (+current - 1) * +pageSize;
     const defaultLimit = +pageSize ? +pageSize : 10;
     const totalResult = (await this.jobModel.find(filter)).length;
     const totalPage = Math.ceil(totalResult / pageSize);

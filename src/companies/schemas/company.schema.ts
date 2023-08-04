@@ -6,11 +6,14 @@ export class Company {
   @Prop()
   name: string;
   @Prop()
-  email: string;
+  address: string;
   @Prop()
   description: string;
   @Prop()
+  logo: string;
+  @Prop()
   createdAt: Date;
+
   @Prop()
   updatedAt: Date;
   @Prop()

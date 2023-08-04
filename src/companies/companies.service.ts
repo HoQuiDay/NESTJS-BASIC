@@ -47,8 +47,8 @@ export class CompaniesService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  findOne(id: string) {
+    return this.companyModel.findOne({ _id: id });
   }
 
   async update(updateCompanyDto: UpdateCompanyDto, user: IUser, id: string) {

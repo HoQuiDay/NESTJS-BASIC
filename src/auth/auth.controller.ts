@@ -44,7 +44,7 @@ export class AuthController {
     return this.authService.createNewToken(req, res);
   }
   @ResponseMessage('Logout User')
-  @Get('logout')
+  @Post('logout')
   handleLogout(@User() user: IUser, @Res({ passthrough: true }) res: Response) {
     return this.authService.logout(user, res);
   }

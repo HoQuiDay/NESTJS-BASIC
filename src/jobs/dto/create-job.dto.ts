@@ -12,6 +12,8 @@ class CompanyObject {
   _id: mongoose.Schema.Types.ObjectId;
   @IsNotEmpty({ message: 'Tên công ty không được để trống' })
   name: string;
+  @IsNotEmpty({ message: 'Logo công ty không được để trống' })
+  logo: string;
 }
 export class CreateJobDto {
   @IsNotEmpty({ message: 'Tên không được để trống' })

@@ -15,9 +15,8 @@ import { Type } from 'class-transformer';
 class CompanyObject {
   @IsNotEmpty({ message: 'Id công ty không được để trống' })
   _id: mongoose.Schema.Types.ObjectId;
-  @IsEmail({}, { message: 'Email công ty không đúng định dạng' })
-  @IsNotEmpty({ message: 'Email công ty không được để trống' })
-  email: string;
+  @IsNotEmpty({ message: 'Tên công ty không được để trống' })
+  name: string;
 }
 export class CreateUserDto {
   @IsNotEmpty({ message: 'Tên không được để trống' })
