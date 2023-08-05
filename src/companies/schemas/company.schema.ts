@@ -13,7 +13,6 @@ export class Company {
   logo: string;
   @Prop()
   createdAt: Date;
-
   @Prop()
   updatedAt: Date;
   @Prop()
