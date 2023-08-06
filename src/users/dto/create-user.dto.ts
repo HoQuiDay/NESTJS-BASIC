@@ -3,6 +3,7 @@ import {
   IsDefined,
   IsEmail,
   IsInt,
+  IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
@@ -33,6 +34,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Địa chỉ không được để trống' })
   address: string;
   @IsNotEmpty({ message: 'Role không được để trống' })
+  @IsMongoId({ message: 'Role phai dung la Id Mongo' })
   role: string;
   @IsNotEmptyObject()
   @IsObject()

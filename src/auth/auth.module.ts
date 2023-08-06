@@ -9,7 +9,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/jwt.strategy';
 import ms from 'ms';
 import { AuthController } from './auth.controller';
-import { MongooseModule } from '@nestjs/mongoose';
+import { RolesModule } from 'src/roles/roles.module';
+import { RolesService } from 'src/roles/roles.service';
 @Module({
   imports: [
     UsersModule,
@@ -25,6 +26,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       }),
       inject: [ConfigService],
     }),
+    RolesModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],

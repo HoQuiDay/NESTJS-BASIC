@@ -13,10 +13,7 @@ export class ResumesService {
   constructor(
     @InjectModel(Resume.name)
     private resumeModel: SoftDeleteModel<ResumeDocument>,
-  ) {
-    const date = new Date();
-    console.log(date);
-  }
+  ) {}
   async create(createResumeDto: CreateUserCvDto, user: IUser) {
     const { url, companyId, jobId } = createResumeDto;
     const newResume = await this.resumeModel.create({
@@ -124,6 +121,18 @@ export class ResumesService {
     return await this.resumeModel.softDelete({ _id: id });
   }
   async findResumeByUser(user: IUser) {
-    return await this.resumeModel.find({ userId: user._id });
+    return await this.resumeModel
+      .find({ userId: user._id })
+      .sort('-createdAt')
+      .populate([
+        {
+          path: 'companyId',
+          select: { name: 1 },
+        },
+        {
+          path: 'jobId',
+          select: { name: 1 },
+        },
+      ]);
   }
 }

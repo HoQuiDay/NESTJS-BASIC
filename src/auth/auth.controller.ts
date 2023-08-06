@@ -1,3 +1,4 @@
+import { Role } from './../roles/schemas/role.schema';
 import { RegisterUserDto } from './../users/dto/create-user.dto';
 import {
   Post,
@@ -13,10 +14,14 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { IUser } from 'src/users/users.interface';
+import { RolesService } from 'src/roles/roles.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private rolesService: RolesService,
+  ) {}
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -31,7 +36,11 @@ export class AuthController {
   }
   @ResponseMessage('Get user information')
   @Get('account')
-  handleGetAccount(@User() user) {
+  async handleGetAccount(@User() user: IUser) {
+    const userPermissions = (await this.rolesService.findOne(
+      user.role._id,
+    )) as any;
+    user.permissions = userPermissions.permissions;
     return { user };
   }
   @Public()

@@ -11,10 +11,18 @@ import aqp from 'api-query-params';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from './users.interface';
+import mongoose from 'mongoose';
+import { ConfigService } from '@nestjs/config';
+import path from 'path';
+import { USER_ROLE } from 'src/databases/sample';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
+    private configService: ConfigService,
+    @InjectModel(Role.name)
+    private RoleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   async create(createUserDto: CreateUserDto, user: IUser) {
@@ -80,14 +88,15 @@ export class UsersService {
     // if (mongoose.Types.ObjectId.isValid(id) === false) {
     //   return 'Not Found User';
     // }
-    const user = await this.userModel.findOne(
-      { _id: id, isDeleted: false },
-      '-password',
-    );
+    const user = await this.userModel
+      .findOne({ _id: id, isDeleted: false }, '-password')
+      .populate({ path: 'role', select: { _id: 1, name: 1 } });
     return user;
   }
   findUserName(userName: string) {
-    return this.userModel.findOne({ email: userName });
+    return this.userModel
+      .findOne({ email: userName })
+      .populate({ path: 'role', select: { name: 1 } });
   }
   isValidPassword(password: string, hash: string) {
     return compareSync(password, hash);
@@ -113,6 +122,13 @@ export class UsersService {
   }
 
   async remove(id: string, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`not found User`);
+    }
+    const foundUser = await this.userModel.findById(id);
+    if ((foundUser.email = this.configService.get<string>('EMAIL_ADMIN'))) {
+      throw new BadRequestException(`can not Delete Admin User`);
+    }
     await this.userModel.updateOne({ _id: id }, { deleteBy: user });
     const result = await this.userModel.softDelete({ _id: id });
     return result;
@@ -124,6 +140,7 @@ export class UsersService {
       throw new BadRequestException(
         `Email: ${email} đã tồn tại trong hệ thống vui lòng nhập email khác`,
       );
+    const userRole = await this.RoleModel.findOne({ name: USER_ROLE });
     const hashPassword = this.getHashPassword(password);
     const newUser = await this.userModel.create({
       name,
@@ -132,7 +149,7 @@ export class UsersService {
       age,
       gender,
       address,
-      role: 'USER',
+      role: userRole?._id,
     });
     return newUser;
   }
@@ -143,6 +160,8 @@ export class UsersService {
     );
   }
   async findUserByToken(refreshToken: string) {
-    return await this.userModel.findOne({ refreshToken });
+    return await this.userModel
+      .findOne({ refreshToken })
+      .populate({ path: 'role', select: { name: 1 } });
   }
 }

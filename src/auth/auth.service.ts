@@ -1,8 +1,10 @@
+import { RolesService } from './../roles/roles.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import ms from 'ms';
+
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
@@ -12,6 +14,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private rolesService: RolesService,
   ) {}
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findUserName(username);
@@ -20,12 +23,18 @@ export class AuthService {
     }
     const isValid = this.usersService.isValidPassword(pass, user.password);
     if (isValid === true) {
-      return user;
+      const userRole = user.role as unknown as { _id: string; name: string };
+      const userPermissions = await this.rolesService.findOne(userRole._id);
+      const objUser = {
+        ...user.toObject(),
+        permissions: userPermissions?.permissions ?? [],
+      };
+      return objUser;
     }
     return null;
   }
   async login(user: IUser, res: Response) {
-    const { _id, name, email, role } = user;
+    const { _id, name, email, role, permissions } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -42,7 +51,7 @@ export class AuthService {
     });
     return {
       access_token: this.jwtService.sign(payload),
-      user: { _id, name, email, role },
+      user: { _id, name, email, role, permissions },
     };
   }
   async register(registerUserDto: RegisterUserDto) {
@@ -69,6 +78,8 @@ export class AuthService {
       });
       let user = await this.usersService.findUserByToken(refreshToken);
       if (user) {
+        const userRole = user.role as unknown as { _id: string; name: string };
+        const userPermissions = await this.rolesService.findOne(userRole._id);
         const { _id, name, email, role } = user;
         const payload = {
           sub: 'token refresh user',
@@ -94,7 +105,13 @@ export class AuthService {
         );
         return {
           access_token: this.jwtService.sign(payload),
-          user: { _id, name, email, role },
+          user: {
+            _id,
+            name,
+            email,
+            role,
+            permission: userPermissions?.permissions ?? [],
+          },
         };
       } else
         throw new BadRequestException(
