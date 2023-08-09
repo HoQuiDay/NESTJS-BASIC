@@ -1,5 +1,5 @@
 import { Role } from './../roles/schemas/role.schema';
-import { RegisterUserDto } from './../users/dto/create-user.dto';
+import { RegisterUserDto, UserLoginDto } from './../users/dto/create-user.dto';
 import {
   Post,
   UseGuards,
@@ -15,7 +15,8 @@ import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { IUser } from 'src/users/users.interface';
 import { RolesService } from 'src/roles/roles.service';
-
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -24,6 +25,7 @@ export class AuthController {
   ) {}
   @Public()
   @UseGuards(LocalAuthGuard)
+  @ApiBody({ type: UserLoginDto })
   @Post('login')
   async handleLogin(@Req() req, @Res({ passthrough: true }) res: Response) {
     return await this.authService.login(req.user, res);

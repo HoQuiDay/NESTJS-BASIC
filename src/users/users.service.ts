@@ -22,7 +22,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
     private configService: ConfigService,
     @InjectModel(Role.name)
-    private RoleModel: SoftDeleteModel<RoleDocument>,
+    private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   async create(createUserDto: CreateUserDto, user: IUser) {
@@ -72,6 +72,7 @@ export class UsersService {
       .limit(defaultLimit)
       .sort(sort as any)
       .populate(population)
+      .select('-password')
       .exec();
     return {
       meta: {
@@ -89,7 +90,8 @@ export class UsersService {
     //   return 'Not Found User';
     // }
     const user = await this.userModel
-      .findOne({ _id: id, isDeleted: false }, '-password')
+      .findOne({ _id: id, isDeleted: false })
+      .select({ password: 0 })
       .populate({ path: 'role', select: { _id: 1, name: 1 } });
     return user;
   }
@@ -126,7 +128,10 @@ export class UsersService {
       throw new BadRequestException(`not found User`);
     }
     const foundUser = await this.userModel.findById(id);
-    if ((foundUser.email = this.configService.get<string>('EMAIL_ADMIN'))) {
+    if (
+      foundUser &&
+      foundUser.email === this.configService.get<string>('EMAIL_ADMIN')
+    ) {
       throw new BadRequestException(`can not Delete Admin User`);
     }
     await this.userModel.updateOne({ _id: id }, { deleteBy: user });
@@ -140,7 +145,7 @@ export class UsersService {
       throw new BadRequestException(
         `Email: ${email} đã tồn tại trong hệ thống vui lòng nhập email khác`,
       );
-    const userRole = await this.RoleModel.findOne({ name: USER_ROLE });
+    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
     const hashPassword = this.getHashPassword(password);
     const newUser = await this.userModel.create({
       name,

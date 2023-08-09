@@ -1,3 +1,4 @@
+import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -11,6 +12,7 @@ import aqp from 'api-query-params';
 export class JobsService {
   constructor(
     @InjectModel(Job.name) private jobModel: SoftDeleteModel<JobDocument>,
+    private usersService: UsersService,
   ) {}
   async create(createJobDto: CreateJobDto, user: IUser) {
     const result = await this.jobModel.create({
@@ -49,7 +51,42 @@ export class JobsService {
       result,
     };
   }
-
+  async findAllByUser(query: string, user: IUser) {
+    let { filter, sort, population } = aqp(query);
+    let findUser = await this.usersService.findOne(user._id);
+    const userRole = findUser.role as unknown as { _id: string; name: string };
+    const userCompany = findUser.company as unknown as {
+      _id: string;
+      name: string;
+    };
+    if (userRole.name !== 'SUPER_ADMIN') {
+      filter = { ...filter, 'company.name': userCompany.name };
+    }
+    const { current, pageSize } = filter;
+    delete filter.current;
+    delete filter.pageSize;
+    console.log('🚀 >>>>> findAllByUser >>>>> filter:', filter);
+    const offset = (+current - 1) * +pageSize;
+    const defaultLimit = +pageSize ? +pageSize : 10;
+    const totalResult = (await this.jobModel.find(filter)).length;
+    const totalPage = Math.ceil(totalResult / pageSize);
+    const result = await this.jobModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort(sort as any)
+      .populate(population)
+      .exec();
+    return {
+      meta: {
+        current: current,
+        pageSize: pageSize,
+        pages: totalPage,
+        total: totalResult,
+      },
+      result,
+    };
+  }
   findOne(id: string) {
     return this.jobModel.findOne({ _id: id });
   }

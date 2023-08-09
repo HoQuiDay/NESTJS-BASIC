@@ -14,7 +14,8 @@ import { CreateResumeDto, CreateUserCvDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customer';
 import { IUser } from 'src/users/users.interface';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('resumes')
 @Controller('resumes')
 export class ResumesController {
   constructor(private readonly resumesService: ResumesService) {}
@@ -36,7 +37,11 @@ export class ResumesController {
   handleFindAll(@Query() query: string) {
     return this.resumesService.findAll(query);
   }
-
+  @Get('company')
+  @ResponseMessage('Fetch all resumes with paginate by User')
+  handleFindAllByUser(@Query() query: string, @User() user: IUser) {
+    return this.resumesService.findAllByUser(query, user);
+  }
   @Get(':id')
   @ResponseMessage('Fetch a resume by id')
   handleFindOne(@Param('id') id: string) {

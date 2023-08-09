@@ -11,9 +11,10 @@ import {
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { ResponseMessage, User } from 'src/decorator/customer';
+import { Public, ResponseMessage, User } from 'src/decorator/customer';
 import { IUser } from 'src/users/users.interface';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('roles')
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
@@ -25,12 +26,14 @@ export class RolesController {
   }
 
   @Get()
+  // @Public()
   @ResponseMessage('Fetch Role with paginate')
   handleFindAll(@Query() query) {
     return this.rolesService.findAll(query);
   }
 
   @Get(':id')
+  // @Public()
   @ResponseMessage('Fetch Role by ID')
   handleFindOne(@Param('id') id: string) {
     return this.rolesService.findOne(id);

@@ -1,5 +1,5 @@
 import { IUser } from './../users/users.interface';
-import { ResponseMessage, User } from 'src/decorator/customer';
+import { Public, ResponseMessage, User } from 'src/decorator/customer';
 import {
   Controller,
   Get,
@@ -13,7 +13,8 @@ import {
 import { PermissionsService } from './permissions.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('permissions')
 @Controller('permissions')
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
@@ -28,12 +29,14 @@ export class PermissionsController {
   }
 
   @Get()
+  // @Public()
   @ResponseMessage('Fetch permissions with paginate')
   handleFindAll(@Query() query: string) {
     return this.permissionsService.findAll(query);
   }
 
   @Get(':id')
+  // @Public()
   @ResponseMessage('Fetch a permission by id')
   handleFindOne(@Param('id') id: string) {
     return this.permissionsService.findOne(id);

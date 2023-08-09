@@ -13,16 +13,16 @@ import { ConfigService } from '@nestjs/config';
 export class RolesService {
   constructor(
     @InjectModel(Role.name)
-    private RoleModel: SoftDeleteModel<RoleDocument>,
+    private roleModel: SoftDeleteModel<RoleDocument>,
     private configService: ConfigService,
   ) {}
   async create(createRoleDto: CreateRoleDto, user: IUser) {
     const { name, description, isActive, permissions } = createRoleDto;
-    const checkName = await this.RoleModel.findOne({ name });
+    const checkName = await this.roleModel.findOne({ name });
     if (checkName) {
       throw new BadRequestException('Đã tồn tại Role trong hệ thống');
     }
-    const result = await this.RoleModel.create({
+    const result = await this.roleModel.create({
       name,
       description,
       isActive,
@@ -40,9 +40,10 @@ export class RolesService {
     const defaultLimit = +pageSize ? +pageSize : 10;
     delete filter.current;
     delete filter.pageSize;
-    const totalResult = (await this.RoleModel.find(filter)).length;
+    const totalResult = (await this.roleModel.find(filter)).length;
     const totalPage = Math.ceil(totalResult / defaultLimit);
-    const result = await this.RoleModel.find(filter)
+    const result = await this.roleModel
+      .find(filter)
       .limit(defaultLimit)
       .skip(offset)
       .sort(sort as any)
@@ -64,7 +65,7 @@ export class RolesService {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new BadRequestException('not found role');
     }
-    return await this.RoleModel.findById(id).populate({
+    return await this.roleModel.findById(id).populate({
       path: 'permissions',
       select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
     });
@@ -72,11 +73,11 @@ export class RolesService {
 
   async update(id: string, updateRoleDto: UpdateRoleDto, user: IUser) {
     const { name, description, isActive, permissions } = updateRoleDto;
-    // const checkName = await this.RoleModel.findOne({ name });
+    // const checkName = await this.roleModel.findOne({ name });
     // if (checkName) {
     //   throw new BadRequestException('Đã tồn tại Role trong hệ thống');
     // }
-    return await this.RoleModel.updateOne(
+    return await this.roleModel.updateOne(
       { _id: id },
       {
         name,
@@ -92,11 +93,11 @@ export class RolesService {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new BadRequestException(`not found Role`);
     }
-    const foundRole = await this.RoleModel.findById(id);
+    const foundRole = await this.roleModel.findById(id);
     if ((foundRole.name = this.configService.get<string>('ROLE_ADMIN'))) {
       throw new BadRequestException(`can not Delete Admin Role`);
     }
-    await this.RoleModel.updateOne(
+    await this.roleModel.updateOne(
       { _id: id },
       {
         deleteBy: {
@@ -105,6 +106,6 @@ export class RolesService {
         },
       },
     );
-    return await this.RoleModel.softDelete({ _id: id });
+    return await this.roleModel.softDelete({ _id: id });
   }
 }

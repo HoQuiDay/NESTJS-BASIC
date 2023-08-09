@@ -7,12 +7,14 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
+  IsString,
   Max,
   Min,
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
 import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 class CompanyObject {
   @IsNotEmpty({ message: 'Id công ty không được để trống' })
   _id: mongoose.Schema.Types.ObjectId;
@@ -56,4 +58,18 @@ export class RegisterUserDto {
   gender: number;
   @IsNotEmpty({ message: 'Địa chỉ không được để trống' })
   address: string;
+}
+export class UserLoginDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: 'dayhq.uit@gmail.com', description: '123456' })
+  readonly username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    example: '123456',
+    description: 'Tài khoản mặc định',
+  })
+  readonly password: string;
 }
