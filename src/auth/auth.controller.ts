@@ -42,7 +42,7 @@ export class AuthController {
     const userPermissions = (await this.rolesService.findOne(
       user.role._id,
     )) as any;
-    user.permissions = userPermissions.permissions;
+    user.permissions = userPermissions?.permissions ?? [];
     return { user };
   }
   @Public()

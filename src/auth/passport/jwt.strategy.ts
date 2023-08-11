@@ -21,15 +21,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: IUser) {
     const { _id, name, email, role } = payload;
     const userRole = role as unknown as { _id: string; name: string };
-    const userPermissions = (
-      await this.rolesService.findOne(userRole._id)
-    ).toObject();
+    const userPermissions = await this.rolesService.findOne(userRole._id);
+    // if(!userPermissions){
+    //   return {
+    //     _id,
+    //     name,
+    //     email,
+    //     role,
+    //     permissions:[],
+    //   };
+    // }
     return {
       _id,
       name,
       email,
       role,
-      permissions: userPermissions?.permissions ?? [],
+      permissions: Boolean(userPermissions)
+        ? userPermissions.toObject()?.permissions ?? []
+        : [],
     };
   }
 }

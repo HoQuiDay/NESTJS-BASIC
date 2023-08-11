@@ -35,6 +35,7 @@ import { HealthModule } from './health/health.module';
         dbName: configService.get<string>('MONGODB_DB'),
         user: configService.get<string>('MONGODB_USER'),
         pass: configService.get<string>('MONGODB_PASS'),
+        // useNewUrlParser: true,
         connectionFactory: (connection) => {
           connection.plugin(softDeletePlugin);
           return connection;

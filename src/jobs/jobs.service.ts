@@ -1,5 +1,5 @@
 import { UsersService } from './../users/users.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { Job, JobDocument } from './schemas/job.schema';
@@ -15,6 +15,17 @@ export class JobsService {
     private usersService: UsersService,
   ) {}
   async create(createJobDto: CreateJobDto, user: IUser) {
+    let findUser= await this.usersService.findOne(user._id)
+    const userRole = findUser.role as unknown as { _id: string; name: string };
+    const userCompany = findUser.company as unknown as {
+      _id: string;
+      name: string;
+    };
+    if (userRole.name==="HR"&&userCompany.name!==createJobDto.company.name) {
+      throw new BadRequestException(
+        "Bạn không có quyền tạo job cho công ty này"
+      )
+    }
     const result = await this.jobModel.create({
       ...createJobDto,
       createdBy: { _id: user._id, email: user.email },
@@ -64,8 +75,7 @@ export class JobsService {
     }
     const { current, pageSize } = filter;
     delete filter.current;
-    delete filter.pageSize;
-    console.log('🚀 >>>>> findAllByUser >>>>> filter:', filter);
+    delete filter.pageSize;    
     const offset = (+current - 1) * +pageSize;
     const defaultLimit = +pageSize ? +pageSize : 10;
     const totalResult = (await this.jobModel.find(filter)).length;
